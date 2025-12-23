@@ -1,0 +1,6 @@
+apiVersion: v2
+name: aps
+description: Helm chart for the Analytics Processing Service (APS)
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
