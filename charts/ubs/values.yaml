@@ -1,0 +1,29 @@
+replicaCount: 2
+
+image:
+  repository: 659591640509.dkr.ecr.us-west-2.amazonaws.com/cloudopshub-ubs
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8081   # UBS API port
+
+serviceAccount:
+  create: false
+  name: ""
+
+ubsSecret:
+  name: ubs-secret
+  dbKey: DATABASE_URL
+  jwtKey: JWT_SECRET
+  billingKey: BILLING_API_KEY
+
+resources: {}
+probes:
+  livenessPath: /health
+  livenessInitialDelay: 10
+  livenessPeriod: 20
+  readinessPath: /ready
+  readinessInitialDelay: 5
+  readinessPeriod: 10
