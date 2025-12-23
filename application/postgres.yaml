@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: postgres
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://charts.bitnami.com/bitnami
+    chart: postgresql
+    targetRevision: 12.0.0
+    helm:
+      values: |
+        auth.username: appuser
+        auth.password: appPassword123
+        auth.database: cloudopshub
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cloudopshub
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

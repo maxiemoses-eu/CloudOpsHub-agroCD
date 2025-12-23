@@ -1,0 +1,8 @@
+auth:
+  username: appuser
+  password: appPassword123
+  database: cloudopshub
+primary:
+  persistence:
+    enabled: true
+    size: 20Gi
