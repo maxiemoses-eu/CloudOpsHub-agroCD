@@ -1,0 +1,33 @@
+replicaCount: 2
+
+image:
+  repository: 659591640509.dkr.ecr.us-west-2.amazonaws.com/cloudopshub-ui
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80   # Nginx default
+
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: dashboard.cloudopshub.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []   # configure if using HTTPS
+
+serviceAccount:
+  create: false
+  name: ""
+
+resources: {}
+probes:
+  livenessPath: /
+  livenessInitialDelay: 10
+  livenessPeriod: 20
+  readinessPath: /
+  readinessInitialDelay: 5
+  readinessPeriod: 10
