@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "dis.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "dis.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "dis.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "dis.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      serviceAccountName: {{ include "dis.serviceAccountName" . }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.service.port }}
+              name: http
+          envFrom:
+            - configMapRef:
+                name: {{ include "dis.fullname" . }}-config
+          env:
+            - name: SOURCE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.disSecret.name }}
+                  key: {{ .Values.disSecret.sourceApiKey }}
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.disSecret.name }}
+                  key: {{ .Values.disSecret.jwtKey }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.probes.livenessPath }}
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: {{ .Values.probes.livenessInitialDelay }}
+            periodSeconds: {{ .Values.probes.livenessPeriod }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.probes.readinessPath }}
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: {{ .Values.probes.readinessInitialDelay }}
+            periodSeconds: {{ .Values.probes.readinessPeriod }}

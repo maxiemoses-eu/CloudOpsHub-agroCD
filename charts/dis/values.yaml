@@ -1,0 +1,28 @@
+replicaCount: 2
+
+image:
+  repository: 659591640509.dkr.ecr.us-west-2.amazonaws.com/cloudopshub-dis
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 7000   # ingestion API port
+
+serviceAccount:
+  create: false
+  name: ""
+
+disSecret:
+  name: dis-secret
+  sourceApiKey: SOURCE_API_KEY
+  jwtKey: JWT_SECRET
+
+resources: {}
+probes:
+  livenessPath: /health
+  livenessInitialDelay: 10
+  livenessPeriod: 20
+  readinessPath: /ready
+  readinessInitialDelay: 5
+  readinessPeriod: 10
