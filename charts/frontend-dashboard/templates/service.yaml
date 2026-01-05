@@ -4,17 +4,11 @@ metadata:
   name: {{ include "ui.fullname" . }}
   labels:
     {{- include "ui.labels" . | nindent 4 }}
-    app.kubernetes.io/component: frontend
-  {{- with .Values.service.annotations }}
-  annotations:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
 spec:
-  # LoadBalancer provides an external IP/DNS via AWS ELB
   type: {{ .Values.service.type | default "LoadBalancer" }}
   ports:
     - port: {{ .Values.service.port | default 80 }}
-      targetPort: 8080 # Aligned with nginxinc/nginx-unprivileged
+      targetPort: 8080 
       protocol: TCP
       name: http
   selector:

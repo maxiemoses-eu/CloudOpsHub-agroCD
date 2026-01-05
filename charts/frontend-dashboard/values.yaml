@@ -1,0 +1,31 @@
+replicaCount: 2
+
+image:
+  repository: <AWS_ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/cloudopshub-ui
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080 # This matches your Dockerfile EXPOSE 8080
+
+# Aligned with the Deployment logic
+probes:
+  livenessPath: /
+  readinessPath: /
+  livenessInitialDelay: 5
+  readinessInitialDelay: 5
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# Standard for ServiceAccount creation
+serviceAccount:
+  create: true
+  name: ""
