@@ -41,13 +41,6 @@ probes:
   readinessInitialDelay: 5
   readinessPeriod: 10
 
-# Added: Autoscaling configuration for the HPA template
-autoscaling:
-  enabled: true
-  minReplicas: 2
-  maxReplicas: 10
-  targetCPUUtilizationPercentage: 80
-
 # Added: Node selector and tolerations for cloud-specific scheduling
 nodeSelector: {}
 tolerations: []
