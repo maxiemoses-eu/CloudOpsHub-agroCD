@@ -1,15 +1,10 @@
-{{- define "aps.name" -}}
-{{ .Chart.Name }}
-{{- end }}
-
-{{- define "aps.fullname" -}}
-{{ .Release.Name }}-{{ .Chart.Name }}
-{{- end }}
-
+{{/*
+Create the name of the service account to use
+*/}}
 {{- define "aps.serviceAccountName" -}}
-{{ if .Values.serviceAccount.name }}
-{{ .Values.serviceAccount.name }}
-{{ else }}
-{{ include "aps.fullname" . }}
-{{ end }}
+{{- if .Values.serviceAccount.create }}
+{{- default (include "aps.fullname" .) .Values.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.serviceAccount.name }}
+{{- end }}
 {{- end }}

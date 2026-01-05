@@ -7,22 +7,29 @@ image:
 
 service:
   type: ClusterIP
-  port: 8080   # typical API port
+  port: 8000
 
 serviceAccount:
-  create: false
-  name: ""
+  create: true
+  name: "cloudopshub-das-sa"
 
-dasSecret:
-  name: das-secret
-  dbKey: DATABASE_URL
-  jwtKey: JWT_SECRET
+secrets:
+  dbPassword: "prod-db-password-here"
+  apiKey: "das-internal-key"
 
-resources: {}
+env:
+  dataStoreUrl: "http://cloudopshub-aps:5000"
+
 probes:
   livenessPath: /health
-  livenessInitialDelay: 10
-  livenessPeriod: 20
   readinessPath: /ready
-  readinessInitialDelay: 5
-  readinessPeriod: 10
+  initialDelay: 10
+  period: 20
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi

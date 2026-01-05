@@ -4,4 +4,4 @@ metadata:
   name: {{ include "das.fullname" . }}-config
 data:
   LOG_LEVEL: "info"
-  FEATURE_FLAG: "true"
+  DATA_STORE_URL: {{ .Values.env.dataStoreUrl | quote }}

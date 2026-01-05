@@ -1,6 +1,8 @@
+# Global settings for the cloudopshub-aps microservice
 replicaCount: 2
 
 image:
+  # Fixed: Removed the duplicate .dkr from the ECR path
   repository: 659591640509.dkr.ecr.us-west-2.amazonaws.com/cloudopshub-aps
   tag: "latest"
   pullPolicy: IfNotPresent
@@ -10,15 +12,27 @@ service:
   port: 5000
 
 serviceAccount:
-  create: false
-  name: ""
+  # Aligned with the helper logic to ensure proper identity
+  create: true
+  name: "cloudopshub-aps-sa"
+  annotations: {}
 
 apsSecret:
+  # Ensure these keys match the stringData in your secrets.yaml
   name: aps-secret
   redisKey: REDIS_URI
   jwtKey: JWT_SECRET
 
-resources: {}
+# Resource constraints to prevent OOM (Out of Memory) kills
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# Health Check paths aligned with aps.py routes
 probes:
   livenessPath: /health
   livenessInitialDelay: 10
@@ -26,3 +40,15 @@ probes:
   readinessPath: /ready
   readinessInitialDelay: 5
   readinessPeriod: 10
+
+# Added: Autoscaling configuration for the HPA template
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+
+# Added: Node selector and tolerations for cloud-specific scheduling
+nodeSelector: {}
+tolerations: []
+affinity: {}

@@ -5,7 +5,14 @@ metadata:
   labels:
     app.kubernetes.io/name: {{ include "aps.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: analytics-service
 spec:
+  # Consider adding a strategy to prevent downtime during updates
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
@@ -18,17 +25,38 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       serviceAccountName: {{ include "aps.serviceAccountName" . }}
+      
+      # Security: Pod-level security context
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 2000
+
+      # DevOps Best Practice: Allow time for batch processing to finish
+      terminationGracePeriodSeconds: 30
+
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          
+          # Container-level security context (read-only root filesystem is safer)
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+
           ports:
             - containerPort: {{ .Values.service.port }}
               name: http
-          envFrom:
-            - configMapRef:
-                name: {{ include "aps.fullname" . }}-config
+          
+          # Environment Variables
           env:
+            - name: PORT
+              value: {{ .Values.service.port | quote }}
+            - name: PYTHONUNBUFFERED
+              value: "1"
             - name: REDIS_URI
               valueFrom:
                 secretKeyRef:
@@ -39,17 +67,28 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.apsSecret.name }}
                   key: {{ .Values.apsSecret.jwtKey }}
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+          
+          # Pulling from ConfigMap for things like LOG_LEVEL
+          envFrom:
+            - configMapRef:
+                name: {{ include "aps.fullname" . }}-config
+
+          # Health Probes - Using named port 'http' for consistency
           livenessProbe:
             httpGet:
               path: {{ .Values.probes.livenessPath }}
-              port: {{ .Values.service.port }}
+              port: http
             initialDelaySeconds: {{ .Values.probes.livenessInitialDelay }}
             periodSeconds: {{ .Values.probes.livenessPeriod }}
+            timeoutSeconds: 5
           readinessProbe:
             httpGet:
               path: {{ .Values.probes.readinessPath }}
-              port: {{ .Values.service.port }}
+              port: http
             initialDelaySeconds: {{ .Values.probes.readinessInitialDelay }}
             periodSeconds: {{ .Values.probes.readinessPeriod }}
+            successThreshold: 1
+            timeoutSeconds: 3
+
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}

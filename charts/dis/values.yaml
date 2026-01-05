@@ -7,22 +7,26 @@ image:
 
 service:
   type: ClusterIP
-  port: 7000   # ingestion API port
+  port: 8001
 
 serviceAccount:
-  create: false
-  name: ""
+  create: true
+  name: "cloudopshub-dis-sa"
 
-disSecret:
-  name: dis-secret
-  sourceApiKey: SOURCE_API_KEY
-  jwtKey: JWT_SECRET
+# Queue Configuration
+env:
+  messageQueueEndpoint: "kafka-broker.messaging.svc.cluster.local:9092"
 
-resources: {}
 probes:
   livenessPath: /health
-  livenessInitialDelay: 10
-  livenessPeriod: 20
   readinessPath: /ready
-  readinessInitialDelay: 5
-  readinessPeriod: 10
+  initialDelay: 10
+  period: 20
+
+resources:
+  limits:
+    cpu: 300m
+    memory: 512Mi # Increased for background task overhead
+  requests:
+    cpu: 150m
+    memory: 256Mi
