@@ -2,7 +2,7 @@ auth:
   enabled: true
   password: redisPassword123
 replica:
-  replicaCount: 2
+  replicaCount: 1
 persistence:
   enabled: true
   size: 8Gi

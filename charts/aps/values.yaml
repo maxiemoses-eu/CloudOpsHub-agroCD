@@ -1,5 +1,5 @@
 # Global settings for the cloudopshub-aps microservice
-replicaCount: 2
+replicaCount: 1
 
 image:
   # Fixed: Removed the duplicate .dkr from the ECR path

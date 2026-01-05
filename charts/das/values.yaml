@@ -1,4 +1,4 @@
-replicaCount: 2
+replicaCount: 1
 
 image:
   repository: 659591640509.dkr.ecr.us-west-2.amazonaws.com/cloudopshub-das
